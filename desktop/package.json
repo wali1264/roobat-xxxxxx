@@ -1,0 +1,35 @@
+{
+  "name": "smart-trading-console",
+  "version": "1.0.0",
+  "description": "Windows Desktop companion application for Smart Trading System MT5 EA & Gemini AI",
+  "main": "main.js",
+  "author": "Smart Trading System Team",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.smarttrading.console",
+    "productName": "Smart Trading Console",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  }
+}

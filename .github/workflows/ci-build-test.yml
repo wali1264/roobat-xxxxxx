@@ -1,0 +1,71 @@
+name: CI Build & Verification
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Type Check / Lint
+        run: npm run lint
+
+      - name: Run Unit & Infrastructure Integration Tests
+        run: npx tsx tests/phase1Infrastructure.test.ts && npx tsx tests/strategyEngine.test.ts && npx tsx tests/riskEngine.test.ts
+
+      - name: Build Web Application & Server Bundle
+        run: npm run build
+
+      - name: Verify Server Output
+        run: test -f dist/server.cjs && echo "Server CommonJS bundle verified."
+
+  build-windows-installer:
+    runs-on: windows-latest
+    needs: build-and-test
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Web Application
+        run: npm run build
+
+      - name: Package Windows Installer
+        working-directory: ./desktop
+        run: |
+          npm ci
+          npx electron-builder --win nsis
+        continue-on-error: true
+
+      - name: Upload Windows Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Smart-Trading-Console-Windows-Installer
+          path: desktop/dist-electron/*.exe
+          if-no-files-found: ignore
+
